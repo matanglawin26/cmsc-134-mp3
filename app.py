@@ -7,6 +7,7 @@ from flask import Flask, request, render_template, redirect
 app = Flask(__name__)
 con = sqlite3.connect("app.db", check_same_thread=False)
 
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     cur = con.cursor()
@@ -21,10 +22,15 @@ def login():
 
         return render_template("login.html")
     else:
-        res = cur.execute("SELECT id from users WHERE username = '"
-                    + request.form["username"]
-                    + "' AND password = '"
-                    + request.form["password"] + "'")
+        # Old Implementation (Vulnerable)
+        # res = cur.execute("SELECT id from users WHERE username = '"
+        #             + request.form["username"]
+        #             + "' AND password = '"
+        #             + request.form["password"] + "'")
+
+        # New Implementation (Parameterized Queries)
+        res = cur.execute("SELECT id from users WHERE username = ? AND password = ?",
+                          (request.form["username"], request.form["password"]))
         user = res.fetchone()
         if user:
             token = secrets.token_hex()
@@ -37,6 +43,7 @@ def login():
         else:
             return render_template("login.html", error="Invalid username and/or password!")
 
+
 @app.route("/")
 @app.route("/home")
 def home():
@@ -47,7 +54,8 @@ def home():
                           + request.cookies.get("session_token") + "';")
         user = res.fetchone()
         if user:
-            res = cur.execute("SELECT message FROM posts WHERE user = " + str(user[0]) + ";")
+            res = cur.execute(
+                "SELECT message FROM posts WHERE user = " + str(user[0]) + ";")
             posts = res.fetchall()
             return render_template("home.html", username=user[1], posts=posts)
 
@@ -80,7 +88,8 @@ def logout():
                           + request.cookies.get("session_token") + "'")
         user = res.fetchone()
         if user:
-            cur.execute("DELETE FROM sessions WHERE user = " + str(user[0]) + ";")
+            cur.execute("DELETE FROM sessions WHERE user = " +
+                        str(user[0]) + ";")
             con.commit()
 
     response = redirect("/login")
