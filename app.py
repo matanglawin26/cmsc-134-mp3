@@ -2,9 +2,11 @@ import secrets
 import sqlite3
 
 from flask import Flask, request, render_template, redirect
-
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = '23nshsdh' 
+csrf = CSRFProtect(app) 
 con = sqlite3.connect("app.db", check_same_thread=False)
 
 
@@ -20,15 +22,8 @@ def login():
             if user:
                 return redirect("/home")
 
-        return render_template("login.html")
+        return render_template("login.html", csrf_token=generate_csrf())
     else:
-        # Old Implementation (Vulnerable)
-        # res = cur.execute("SELECT id from users WHERE username = '"
-        #             + request.form["username"]
-        #             + "' AND password = '"
-        #             + request.form["password"] + "'")
-
-        # New Implementation (Parameterized Queries)
         res = cur.execute("SELECT id from users WHERE username = ? AND password = ?",
                           (request.form["username"], request.form["password"]))
         user = res.fetchone()
@@ -57,7 +52,7 @@ def home():
             res = cur.execute(
                 "SELECT message FROM posts WHERE user = " + str(user[0]) + ";")
             posts = res.fetchall()
-            return render_template("home.html", username=user[1], posts=posts)
+            return render_template("home.html", username=user[1], posts=posts, csrf_token=generate_csrf())
 
     return redirect("/login")
 

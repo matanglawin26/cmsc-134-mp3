@@ -8,14 +8,12 @@
     <a href="/logout">Logout</a>
     <h3>Posts</h3>
     <form method="post" action="/posts">
-      <input type="text" name="message">
-      <input type="submit" value="Post!">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <input type="text" name="message" />
+      <input type="submit" value="Post!" />
     </form>
     <ul>
-      {% if not posts %}
-      No posts.
-      {% endif %}
-      {% for post in posts %}
+      {% if not posts %} No posts. {% endif %} {% for post in posts %}
       <li>{{ post[0] | safe }}</li>
       {% endfor %}
     </ul>
