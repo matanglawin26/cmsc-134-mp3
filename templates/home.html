@@ -1,16 +1,40 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <!-- CSP implementation canceled for now -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="script-src *.google.com *.adroll.com" /> -->
     <title>Home</title>
   </head>
   <body>
     <h2>Welcome, {{username}}!</h2>
     <a href="/logout">Logout</a>
     <h3>Posts</h3>
-    <form method="post" action="/posts">
-      <input type="text" name="message">
-      <input type="submit" value="Post!">
+    <form method="post" action="/posts" onsubmit="sanitize()">
+      <input type="text" name="message" id="msg" required maxlength="50"/>
+      <input type="submit" value="Post!"/>
     </form>
+    <script>
+      // Preventing XSS attacks by sanitizing input
+      function encodeHTML(string){
+        const map = {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#x27;',
+          "/": '&#x2F;',
+          "`": '&grave;'
+        }
+        const reg = /[&<>"'/`]/ig;
+        return string.replace(reg, (match)=>(map[match]));
+      }
+
+      function sanitize(){
+        let msg = document.getElementById("msg").value;
+        document.getElementById("msg").value = encodeHTML(msg);
+        // console.log('yea');
+      }
+    </script>
     <ul>
       {% if not posts %}
       No posts.
