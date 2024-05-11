@@ -10,36 +10,34 @@
     <a href="/logout">Logout</a>
     <h3>Posts</h3>
     <form method="post" action="/posts" onsubmit="sanitize()">
-      <input type="text" name="message" id="msg" required maxlength="50"/>
-      <input type="submit" value="Post!"/>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <input type="text" name="message" id="msg" required maxlength="50" />
+      <input type="submit" value="Post!" />
     </form>
     <script>
       // Preventing XSS attacks by sanitizing input
-      function encodeHTML(string){
+      function encodeHTML(string) {
         const map = {
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#x27;',
-          "/": '&#x2F;',
-          "`": '&grave;'
-        }
-        const reg = /[&<>"'/`]/ig;
-        return string.replace(reg, (match)=>(map[match]));
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#x27;",
+          "/": "&#x2F;",
+          "`": "&grave;",
+        };
+        const reg = /[&<>"'/`]/gi;
+        return string.replace(reg, (match) => map[match]);
       }
 
-      function sanitize(){
+      function sanitize() {
         let msg = document.getElementById("msg").value;
         document.getElementById("msg").value = encodeHTML(msg);
         // console.log('yea');
       }
     </script>
     <ul>
-      {% if not posts %}
-      No posts.
-      {% endif %}
-      {% for post in posts %}
+      {% if not posts %} No posts. {% endif %} {% for post in posts %}
       <li>{{ post[0] | safe }}</li>
       {% endfor %}
     </ul>

